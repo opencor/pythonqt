@@ -39,7 +39,7 @@
 */
 //----------------------------------------------------------------------------------
 
-#include <PythonQt.h>
+#include "PythonQt.h"
   
 #ifndef Py_XSETREF // Some Python2, but not the latest one
 #define Py_XSETREF(op1, op2)                       \
@@ -109,7 +109,7 @@ PythonQtObjectPtr::PythonQtObjectPtr(PythonQtSafeObjectPtr &&p) :_object(p.takeO
 
 PythonQtObjectPtr::~PythonQtObjectPtr()
 {
-  Py_XDECREF(_object);
+  if (_object && Py_IsInitialized()) Py_DECREF(_object);
 }
 
 void PythonQtObjectPtr::setNewRef(PyObject* o)

@@ -110,11 +110,6 @@ PyObject* PythonQtSignalTarget::call(PyObject* callable, const PythonQtMethodInf
   for (int i = 1; i < count; i++) {
     const PythonQtMethodInfo::ParameterInfo& param = params.at(i);
     PyObject* arg = PythonQtConv::ConvertQtValueToPython(param, arguments[i]);
-    if (arg && (param.pointerCount == 1) && (param.name == "PyObject")) {
-      // ConvertQtValueToPython does not ref-count the PyObject, so we have to
-      // do it ourselves...
-      Py_INCREF(arg);
-    }
     if (arg) {
       // steals reference, no unref
       PyTuple_SetItem(pargs, i-1, arg);
@@ -178,10 +173,12 @@ PythonQtSignalReceiver::PythonQtSignalReceiver(QObject* obj):PythonQtSignalRecei
 
 PythonQtSignalReceiver::~PythonQtSignalReceiver()
 {
-  // we need the GIL scope here, because the targets keep references to Python objects
-  PYTHONQT_GIL_SCOPE;
-  PythonQt::priv()->removeSignalEmitter(_obj);
-  _targets.clear();
+  if (PythonQt::priv()) {
+    // we need the GIL scope here, because the targets keep references to Python objects
+    PYTHONQT_GIL_SCOPE;
+    PythonQt::priv()->removeSignalEmitter(_obj);
+    _targets.clear();
+  }
 }
 
 

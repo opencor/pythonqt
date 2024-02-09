@@ -824,6 +824,7 @@ PythonQtClassWrapper* PythonQtPrivate::createNewPythonQtClassWrapper(PythonQtCla
   // create the new type object by calling the type
   result = (PythonQtClassWrapper *)PyObject_Call((PyObject *)&PythonQtClassWrapper_Type, args, nullptr);
 
+  Py_DECREF(moduleName);
   Py_DECREF(baseClasses);
   Py_DECREF(typeDict);
   Py_DECREF(moduleName);
@@ -859,6 +860,7 @@ PyObject* PythonQtPrivate::createNewPythonQtEnumWrapper(const char* enumName, Py
   // create the new int derived type object by calling the core type
   result = PyObject_Call((PyObject *)&PyType_Type, args, nullptr);
 
+  Py_DECREF(module);
   Py_DECREF(baseClasses);
   Py_DECREF(module);
   Py_DECREF(typeDict);
@@ -1563,6 +1565,9 @@ PythonQtClassInfo* PythonQtPrivate::currentClassInfoForClassWrapperCreation()
 
 void PythonQtPrivate::addDecorators(QObject* o, int decoTypes)
 {
+  if (!o) {
+    return;
+  }
   o->setParent(this);
   int numMethods = o->metaObject()->methodCount();
   for (int i = 0; i < numMethods; i++) {
